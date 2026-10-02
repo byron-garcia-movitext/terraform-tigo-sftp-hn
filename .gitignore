@@ -1,0 +1,23 @@
+# State: nunca al repo, puede contener datos sensibles en texto plano.
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl.bak
+
+# Variables locales / sobreescrituras
+*.auto.tfvars
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Planes
+*.tfplan
+tfplan
+tfplan.*
+crash.log
+crash.*.log
+
+# Llaves
+*.pem
+*.ppk
