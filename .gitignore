@@ -21,3 +21,5 @@ crash.*.log
 # Llaves
 *.pem
 *.ppk
+
+.terraform.tfstate.lock.info

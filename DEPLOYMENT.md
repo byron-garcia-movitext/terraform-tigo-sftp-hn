@@ -151,6 +151,4 @@ Lo que quedo creado es la infraestructura, no el servicio.
 
 ## Estado de Terraform
 
-El state es **local** (`terraform.tfstate`, excluido del repositorio por `.gitignore`). No hay backend remoto ni locking.
-
-Si se pierde ese archivo, Terraform deja de saber que estos recursos existen y un `apply` posterior intentaria crear una segunda instancia en lugar de administrar la actual. Debe respaldarse fuera del repositorio.
+El state vive en S3: `s3://movi-terraform-s3/sftp-tigo-hn/terraform.tfstate`, con locking nativo (`use_lockfile`). Ver `backend.tf`. No se sube al repositorio.

@@ -79,20 +79,32 @@ terraform apply tfplan
 
 ## State
 
-El state es **local**: vive en `terraform.tfstate` dentro de esta carpeta. No hay backend remoto.
-
-Implicaciones a tener presentes:
-
-- **El archivo esta en `.gitignore` y no debe subirse al repo.** El state guarda en texto plano cosas
-  que la API devuelve, incluidas las que en el codigo estarian marcadas como sensibles.
-- **Si se pierde el `terraform.tfstate`, Terraform deja de saber que la instancia existe.** Un `apply`
-  posterior intentaria crear una segunda instancia en vez de administrar la actual. Conviene respaldar
-  el archivo (y su `.backup`) junto con el resto de la documentacion del proyecto.
-- **No hay locking.** Mientras el state sea local, que aplique una sola persona desde una sola maquina.
-
-Si mas adelante se decide mover a S3, en `versions.tf` esta el bloque `backend "s3"` comentado:
-se descomenta y se corre `terraform init -migrate-state`.
+El state esta en S3 (`movi-terraform-s3/sftp-tigo-hn/terraform.tfstate`), ver `backend.tf` y la seccion
+**State remoto (S3)** al final. Sigue sin subirse al repo: guarda en texto plano cosas que la API
+devuelve, incluidas las marcadas como sensibles.
 
 ## Pendientes
 
 - No hay IAM instance profile. Si se quiere SSM Session Manager o Patch Manager (coherente con el tag `PatchGroup`), hay que agregarlo.
+
+
+## State remoto (S3)
+
+El state de Terraform **no se guarda en git**. Vive en S3:
+
+| | |
+|---|---|
+| Bucket | `movi-terraform-s3` (us-east-1, cifrado SSE) |
+| Key | `sftp-tigo-hn/terraform.tfstate` |
+| Locking | nativo de S3 (`use_lockfile = true`), sin DynamoDB |
+
+La configuración está en `backend.tf`. Para trabajar con el proyecto:
+
+```bash
+git clone <repo> && cd <repo>
+terraform init        # descarga el state desde S3 automáticamente
+terraform plan
+```
+
+Requisitos: Terraform >= 1.10 y credenciales AWS con permiso `s3:GetObject`, `s3:PutObject`, `s3:DeleteObject` y `s3:ListBucket` sobre `movi-terraform-s3/sftp-tigo-hn/*`.
+No copies ni subas `terraform.tfstate` a mano: si `terraform init` pregunta por migrar un state local, cancela y revisa.
